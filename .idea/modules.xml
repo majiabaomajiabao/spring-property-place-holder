@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/propertyplace/propertyplace.iml" filepath="$PROJECT_DIR$/propertyplace/propertyplace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/spring-property-place-holder.iml" filepath="$PROJECT_DIR$/.idea/spring-property-place-holder.iml" />
+    </modules>
+  </component>
+</project>
