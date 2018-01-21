@@ -7,11 +7,11 @@
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:*.properties</value>
+                <value>classpath:zk.properties</value>
             </list>
         </property>
     </bean>
 
-    <import resource="classpath*:spring-bean.xml"/>
+    <import resource="classpath:spring-bean.xml"/>
 
 </beans>
