@@ -1,0 +1,27 @@
+问题：
+为什么xml配置的bean，可以通过${}，注入属性值，但通过component-scan注入的对象却不可以？
+
+实验结论：
+因为xml配置的bean，spring解析出来的beanDefinition，在propertyValues中将属性名和带有${}的属性值添加进去了，
+然后PropertyPlaceholderConfigurer实现了BeanFactoryPostProcessor，会将beanDefinition中的propertyValues中的所有${}，替换成真正的值。
+但component-scan注入的bean是不会向propertyValues中添加属性的键值对的，其实仔细想一想也应该清楚，这是jdk的自己设置，压根跟spring没关系，
+因为 private String zkAddress = "${common.zookeeper.address}";  这完全就是一个成员变量的值，应该是编译进class文件，在初始化对象的过程，
+由jdk自动赋值，所以跟spring的加载过程根本没关系。
+
+
+问题：
+如果没有WebConfig这个类，为什么<context:component-scan base-package="com.jiabao"></context:component-scan>只能web-servlet.xml中配置,
+在spring-bean.xml中配置就无效呢？
+
+分成几点来解释:
+    1)首先负责将url跟controller的映射关系注册到spring中的是BeanNameUrlHandlerMapping,它继承了WebApplicationObjectSupport,监听了ApplicationContext,
+    在beanfactory在getBean(BeanNameUrlHandlerMapping)的时候，会执行beanpostprocessor(ApplicationContextAwareProcessor),最终会调用BeanNameUrlHandlerMapping的
+    setApplicationContext方法,在这个方法里就执行了detectHandlers,自动挖掘当前context中所有的beannames中含有@requestMapping的方法，然后进行注册
+
+    2)如果没有Webconfig这个类,并且将<context:component-scan>配置在spring-bean.xml中,在初始化contextloadlistener,并不会注入BeanNameUrlHandlerMapping,
+    所以在这个context初始化的过程中,不会进行注册.那在初始化dispatcherservlet的时候,会注入BeanNameUrlHandlerMapping,但这个context中所有beannames,
+    不包括@controller那些bean了,因为它解析的是web-servlet.xml这个文件(但需要说明的一点是,getBeanOfType是可以拿到父context中的对象的,只是getBeanNameForType
+    取不到父类的),所以此时就注册不了的url的映射关系了
+
+    3)如果有WebConfig这个类,在初始化contextloadlistener,会扫描它的父类WebMvcConfigurationSupport,会注入Beannameurlhandlermapping,并且是在contextloadlistener
+    这个context的初始化过程中,所以此时又可以获取@controller注入的这些controller对象,所以可以成功注入url的映射关系
